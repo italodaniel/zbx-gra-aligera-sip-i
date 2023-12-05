@@ -9,7 +9,7 @@ Template_Aligera_AG1700_SIP-I e Grafana Dashboard
 
 **Zabbix**: [Repositório no GitHub](https://github.com/italodaniel/zbx-gra-aligera-sip-i)
 
-**Grafana**: [Dashboard no Grafana](https://grafana.com/grafana/dashboards/20086-sip-i-tim-brasil/)
+**Grafana**: [Dashboard no Grafana](https://grafana.com/grafana/dashboards/20093-sip-i-tim-brasil/)
 
 ### HOMOLOGADO PARA:
 - Zabbix 6.4.8
