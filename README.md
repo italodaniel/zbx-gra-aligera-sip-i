@@ -2,6 +2,7 @@
 
 Media Gateway Aligera AG1700 SIP-I
 Template Zabbix e Dashboard Grafana
+OBS: Nos prints em anexo foi removido os IPs na coleta do SIP PEERS HOSTS por questões de segurança.
 
 ## PT-BR
 Template_Aligera_AG1700_SIP-I e Grafana Dashboard
@@ -28,6 +29,9 @@ MIB Aligera: [Link para download](https://docs.aligera.com.br/images/b/b5/ALIGER
 
 #### No Grafana:
 Importe o Dashboard: [SIP-I - ALIGERA - Dashboard](https://grafana.com/grafana/dashboards/20086-sip-i-tim-brasil/). Com o template já importado, selecione a Fonte de Dados, que é o Zabbix.
+1. Ao selecionar a query, siga a ordem do print em anexo.
+2. Item - PeersNameOne, PeersHostOne e KeepaliveOne. 
+3. Os itens devem seguir a ordem numérica conforme mencionado acima.
 
 ### Dúvidas e sugestões de melhoria:
 - Instagram: [daniel_itallo](https://www.instagram.com/daniel_itallo)
