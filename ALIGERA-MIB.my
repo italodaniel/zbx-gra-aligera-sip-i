@@ -1,0 +1,1335 @@
+-- *****************************************************************
+-- ALIGERA-MIB.my: Aligera Equipamentos Digitais Ltda.
+--                                 Application MIB file
+--
+-- March 2022,  William da Rosa Frohlich
+--
+-- All rights reserved.
+-- *****************************************************************
+
+ALIGERA-MIB DEFINITIONS ::= BEGIN
+IMPORTS
+    enterprises,
+    MODULE-IDENTITY,
+ OBJECT-TYPE,
+ OBJECT-IDENTITY
+        FROM SNMPv2-SMI
+    Unsigned32,
+    Integer32,
+    Counter32,
+    TimeTicks,
+    NOTIFICATION-TYPE
+        FROM SNMPv2-SMI
+    DisplayString, TruthValue, TEXTUAL-CONVENTION
+        FROM SNMPv2-TC;
+
+aligeraMIB MODULE-IDENTITY
+    LAST-UPDATED    "202203290000Z"  -- 29 Mar 2022
+ ORGANIZATION    "Aligera Equipamentos Digitais Ltda."
+    CONTACT-INFO
+            "       Aligera Equipamentos Digitais Ltda.
+
+            Postal: 1100 Rua Dr. João Inácio
+                    Porto Alegre, RS 90230-181
+                    Brazil
+
+            Tel: +55 51 3500-0100
+
+            E-mail: suporte@aligera.com.br"
+    DESCRIPTION
+        "MIB Aligera."
+
+    REVISION "202203290000Z"  -- 29 Mar 2022
+    DESCRIPTION
+        "Initial version of this MIB module."
+
+::= { enterprises 41933 }
+
+
+--*******************************************************************
+-- OBJECTS
+--*******************************************************************
+aligeraMgmt OBJECT-IDENTITY
+    STATUS      current
+    DESCRIPTION
+        "The main subtree for delivered MIBs."
+    ::= { aligeraMIB 1 }
+
+DisplayString ::= OCTET STRING
+OwnerString ::= DisplayString
+
+device      OBJECT IDENTIFIER ::= { aligeraMgmt 1 }
+e1          OBJECT IDENTIFIER ::= { aligeraMgmt 2 }
+chan        OBJECT IDENTIFIER ::= { aligeraMgmt 3 }
+ss7         OBJECT IDENTIFIER ::= { aligeraMgmt 4 }
+sip         OBJECT IDENTIFIER ::= { aligeraMgmt 5 }
+firewall    OBJECT IDENTIFIER ::= { aligeraMgmt 6 }
+call        OBJECT IDENTIFIER ::= { aligeraMgmt 7 }
+
+
+--*******************************************************************
+-- Device Info
+--*******************************************************************
+deviceName OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Product Name"
+    ::= { device 1 }
+
+serialNumber OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Product Serial Number"
+    ::= { device 2 }
+
+systemVersion OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "System Version"
+    ::= { device 3 }
+
+deviceLicenseTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF  DeviceLicenseEntry
+    MAX-ACCESS          not-accessible
+    STATUS              current
+    DESCRIPTION
+        "The table listing Product Licenses."
+    ::= { device 4 }
+
+deviceLicenseEntry OBJECT-TYPE
+    SYNTAX      DeviceLicenseEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "An entry in deviceLicenseTable."
+    INDEX { deviceLicenseIndex }
+    ::= { deviceLicenseTable 1 }
+
+DeviceLicenseEntry ::= SEQUENCE {
+    deviceLicenseIndex Integer32,
+    deviceLicenseType DisplayString,
+    deviceLicenseCreationDate DisplayString,
+    deviceLicenseExpirationDate DisplayString,
+    deviceLicenseQuantity DisplayString
+}
+
+deviceLicenseIndex OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "The value of this object uniquely identifies this ifEntry."
+    ::= { deviceLicenseEntry 1 }
+
+deviceLicenseType OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "String describing the Product Lisense Type."
+    ::= { deviceLicenseEntry 2 }
+
+deviceLicenseCreationDate OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "String describing the Product Lisense Creation Date."
+    ::= { deviceLicenseEntry 3 }
+
+deviceLicenseExpirationDate OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "String describing the Product Lisense Expiration Date."
+    ::= { deviceLicenseEntry 4 }
+
+deviceLicenseQuantity OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "String describing the Product Lisense Allowed E1s."
+    ::= { deviceLicenseEntry 5 }
+
+passwordChange OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Last password change timestamp"
+    ::= { device 5 }
+
+usageCpu OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Device CPU usage"
+    ::= { device 6 }
+
+usageMemory OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Device memory usage"
+    ::= { device 7 }
+
+usageDisk OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Device Disk usage"
+    ::= { device 8 }
+
+
+-- Trap
+deviceTraps  OBJECT IDENTIFIER ::= { device 9 }
+
+usageCpuAlarm NOTIFICATION-TYPE
+    OBJECTS     { usageCpu }
+    STATUS      current
+    DESCRIPTION
+        "A usageCpuAlarm trap signifies that the usageCpu is above 95%."
+    ::= { deviceTraps 1 }
+
+usageMemoryAlarm NOTIFICATION-TYPE
+    OBJECTS     { usageMemory }
+    STATUS      current
+    DESCRIPTION
+        "A usageMemoryAlarm trap signifies that the usageMemory is above 95%."
+    ::= { deviceTraps 2 }
+
+usageDiskAlarm NOTIFICATION-TYPE
+    OBJECTS     { usageDisk }
+    STATUS      current
+    DESCRIPTION
+        "A usageDiskAlarm trap signifies that the usageDisk is above 95%."
+    ::= { deviceTraps 3 }
+
+
+--*******************************************************************
+-- E1 Interfaces
+--*******************************************************************
+e1Number OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The number of E1 Interfaces present on this system."
+    ::= { e1 1 }
+
+e1Table OBJECT-TYPE
+    SYNTAX      SEQUENCE OF E1Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The table listing E1 interfaces status and counters. The number of entries
+        is giver by the value of ifNumber."
+    ::= { e1 2 }
+
+-- Trap
+e1Traps  OBJECT IDENTIFIER ::= { e1 3 }
+
+e1AlarmsChange NOTIFICATION-TYPE
+    OBJECTS     { e1Index, e1Alarms }
+    STATUS      current
+    DESCRIPTION
+        "A e1AlarmsChange trap signifies that the e1Alarms changed."
+    ::= { e1Traps 1 }
+
+e1Entry OBJECT-TYPE
+    SYNTAX      e1Entry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "An entry in e1Table"
+    INDEX { e1Index }
+    ::= { e1Table 1 }
+
+E1Entry ::= SEQUENCE {
+    e1Index             Integer32,
+    e1Alarms            INTEGER,
+    e1StatsTime         TimeTicks,
+    e1CodeViolations    Counter32,
+    e1Slips             Counter32,
+    e1CRCErrors         Counter32,
+    e1LOSEvents         Counter32,
+    e1LOSTime           TimeTicks,
+    e1AISEvents         Counter32,
+    e1AISTime           TimeTicks,
+    e1BFAEEvents        Counter32,
+    e1BFAETime          TimeTicks,
+    e1MFAEEvents        Counter32,
+    e1MFAETime          TimeTicks,
+    e1RAIEvents         Counter32,
+    e1RAITime           TimeTicks,
+
+    e1TotalChannels     INTEGER,
+    e1IdleChannels      INTEGER,
+    e1BusyChannels      INTEGER,
+    e1BlockedChannels   INTEGER
+}
+
+e1Index OBJECT-TYPE
+    SYNTAX Integer32 (1..2147483647)
+    MAX-ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The value of this object uniquely identifies this ifEntry."
+  ::= { e1Entry 1 }
+
+e1Alarms OBJECT-TYPE
+    SYNTAX      INTEGER { OK(0), LOS(1), AIS(2), BFAE(3), MFAE(4), RAI(5) }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "E1 Alarms (0 = OK, 1 = LOS, 2 = AIS, 3 = BFAE, 4 = MFAE, 5 = RAI)"
+    ::= { e1Entry 2 }
+
+e1StatsTime OBJECT-TYPE
+    SYNTAX      TimeTicks
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+       "E1 statistics time in 0.01 seconds"
+    ::= { e1Entry 3 }
+
+e1CodeViolations OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "E1 code violations since last statistics reset"
+    ::= { e1Entry 4 }
+
+e1Slips OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "E1 slips since last statistics reset"
+    ::= { e1Entry 5 }
+
+e1CRCErrors OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "E1 CRC errors since last statistics reset"
+    ::= { e1Entry 6 }
+
+e1LOSEvents OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "E1 LOS (Loss of Signal) events since last statistics reset"
+    ::= { e1Entry 7 }
+
+e1LOSTime OBJECT-TYPE
+    SYNTAX      TimeTicks
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Time (in 0.01 seconds) E1 spent in LOS (Loss of Signal) since last statistics
+        reset"
+    ::= { e1Entry 8 }
+
+e1AISEvents OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "E1 AIS (Alarm Indication Signal) events since last statistics reset"
+    ::= { e1Entry 9 }
+
+e1AISTime OBJECT-TYPE
+    SYNTAX      TimeTicks
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Time (in 0.01 seconds) E1 spent in AIS (Alarm Indication Signal)
+        since last statistics reset"
+    ::= { e1Entry 10 }
+
+e1BFAEEvents OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "E1 BFAE (Basic Frame Alignment Error) events since last statistics reset"
+  ::= { e1Entry 11 }
+
+e1BFAETime OBJECT-TYPE
+    SYNTAX      TimeTicks
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Time (in 0.01 seconds) E1 spent in BFAE (Basic Frame Alignment Error) since
+        last statistics reset"
+    ::= { e1Entry 12 }
+
+e1MFAEEvents OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "E1 MFAE (Multi Frame Alignment Error) events since last statistics reset"
+    ::= { e1Entry 13 }
+
+e1MFAETime OBJECT-TYPE
+    SYNTAX      TimeTicks
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Time (in 0.01 seconds) E1 spent in MFAE (Multi Frame Alignment Error) since
+        last statistics reset"
+  ::= { e1Entry 14 }
+
+e1RAIEvents OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "E1 RAI (Remote Alarm Indication) events since last statistics reset"
+    ::= { e1Entry 15 }
+
+e1RAITime OBJECT-TYPE
+    SYNTAX      TimeTicks
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Time (in 0.01 seconds) E1 spent in RAI (Remote Alarm Indication) since last
+        statistics reset"
+    ::= { e1Entry 16 }
+
+e1TotalChannels OBJECT-TYPE
+    SYNTAX      INTEGER
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of voice channels configured on this interface"
+    ::= { e1Entry 17 }
+
+e1IdleChannels OBJECT-TYPE
+    SYNTAX      INTEGER
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of idle voice channels available on this interface"
+    ::= { e1Entry 18 }
+
+e1BusyChannels OBJECT-TYPE
+    SYNTAX      INTEGER
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of busy voice channels being used on this interface"
+    ::= { e1Entry 19 }
+
+e1BlockedChannels OBJECT-TYPE
+    SYNTAX      INTEGER
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of blocked voice channels on this interface"
+    ::= { e1Entry 20 }
+
+
+--*******************************************************************
+-- Channels (FXS, FXO, MFCR2, PRI-NET, ISDN-NET, ISDN-CPE ...)
+--*******************************************************************
+chanNumber OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The number of voice channels present on this system."
+    ::= { chan 1 }
+
+chanTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF ChanEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The table listing channel type and status."
+    ::= { chan 2 }
+
+chanEntry OBJECT-TYPE
+    SYNTAX      ChanEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "An entry in chanTable"
+    INDEX { chanIndex }
+    ::= { chanTable 1 }
+
+ChanEntry ::= SEQUENCE {
+    chanIndex       Integer32,
+    chanType        INTEGER,
+    chanStatus      INTEGER
+}
+
+chanIndex OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "The value of this object uniquely identifies this ifEntry."
+    ::= { chanEntry 1 }
+
+chanType OBJECT-TYPE
+    SYNTAX      INTEGER { UNKNOWN(0), MFCR2(1), ISDNNET(2), ISDNCPE(3), FXO(4), FXS(5), SIG(6), SS7(7) }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Channel Type (0 = UNKNOWN, 1 = MFCR2, 2 = ISDN NET, 3 = ISDN CPE, 4 = FXO, 
+        5 = FXS, 6 = SIG, 7 = SS7)"
+    ::= { chanEntry 2 }
+
+chanStatus OBJECT-TYPE
+    SYNTAX      INTEGER { BLOCKED(0), IDLE(1), BUSY(2), NA(3) }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Channel Status (0 = BLOCKED, 1 = IDLE, 2 = BUSY, 3 = NA)"
+    ::= { chanEntry 3 }
+
+-- Trap
+chanTraps OBJECT IDENTIFIER ::= { chan 3 }
+
+chanStatusChange NOTIFICATION-TYPE
+ OBJECTS { chanIndex, chanStatus }
+    STATUS  current
+    DESCRIPTION
+        "A chanStatusChange trap signifies that the chanStatus changed."
+    ::= { chanTraps 1 }
+
+chanStatistics OBJECT IDENTIFIER ::= { chan 4 }
+
+activeCalls OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of active calls in the moment."
+    ::= { chanStatistics 1 }
+
+channelUsagePercentage OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Channel usage: Active call divided by number of channels."
+    ::= { chanStatistics 2 }
+
+totalCallsProcessed OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Total calls processed since startup."
+    ::= { chanStatistics 3 }
+
+activeChannels OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of active channels in the moment."
+    ::= { chanStatistics 4 }
+
+chanTotalUseSip OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Total use of SIP channels"
+    ::= { chan 5 }
+
+chanTotalUseSipPct OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Percentage of use of SIP channels"
+    ::= { chan 6 }
+
+chanTotalUseSipI OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Total use of SIP-I channels"
+    ::= { chan 7 }
+
+chanTotalUseSipIPct OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Percentage of use of SIP-I channels"
+    ::= { chan 8 }
+
+
+--*******************************************************************
+-- Channels (FXS, FXO, MFCR2, PRI-NET, ISDN-NET, ISDN-CPE ...)
+--*******************************************************************
+linksetNumber OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Total number of linksets."
+    ::= { ss7 1 }
+
+cicUsageTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF CicUsageEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The table listing cic usage information."
+    ::= { ss7 2 }
+
+cicStatusTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF CicStatusEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The table listing cic status information."
+    ::= { ss7 3 }
+
+localSignalingTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF LocalSignalingEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The table listing local signaling information."
+    ::= { ss7 4 }
+
+remoteSignalingTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF RemoteSignalingEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The table listing remote signaling information."
+    ::= { ss7 5 }
+
+signalingGatewayClientsTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SignalingGatewayClientEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The table listing signaling gateway clients information."
+    ::= { ss7 6 }
+
+-- Trap
+ss7Traps  OBJECT IDENTIFIER ::= { ss7 7 }
+
+localSignalingStatusChange NOTIFICATION-TYPE
+    OBJECTS { localSignalingIndex, localSignalingState }
+    STATUS  current
+    DESCRIPTION
+        "A localSignalingStatusChange trap signifies that the localSignalingState
+        changed."
+    ::= { ss7Traps 1 }
+
+remoteSignalingMtp2StateChange NOTIFICATION-TYPE
+    OBJECTS     { remoteSignalingIndex, remoteSignalingMtp2State }
+    STATUS      current
+    DESCRIPTION
+        "A remoteSignalingIndex trap signifies that the remoteSignalingMtp2State
+        changed."
+    ::= { ss7Traps 2 }
+
+remoteSignalingTcpStateChange NOTIFICATION-TYPE
+    OBJECTS     { remoteSignalingIndex, remoteSignalingTcpState }
+    STATUS      current
+    DESCRIPTION
+        "A remoteSignalingTcpStateChange trap signifies that the remoteSignalingTcpState
+        changed."
+    ::= { ss7Traps 3 }
+
+signalingGatewayClientEntry OBJECT-TYPE
+    SYNTAX      SignalingGatewayClientEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "An entry in signalingGatewayTable."
+    INDEX { signalingGatewayClientIndex }
+    ::= { signalingGatewayClientsTable 1 }
+
+SignalingGatewayClientEntry ::= SEQUENCE {
+    signalingGatewayClientIndex        Integer32,
+    signalingGatewayClientName         DisplayString,
+    signalingGatewayClientAddr         DisplayString,
+    signalingGatewayClientSrcPort      INTEGER,
+    signalingGatewayClientProtocol     DisplayString,
+    signalingGatewayClientIpState      INTEGER
+}
+
+signalingGatewayClientIndex OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "The value of this object uniquely identifies this ifEntry."
+    ::= { signalingGatewayClientEntry 1 }
+
+signalingGatewayClientName OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "String describing the SG client name."
+    ::= { signalingGatewayClientEntry 2 }
+
+
+signalingGatewayClientAddr OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "SG client IP address."
+    ::= { signalingGatewayClientEntry 3 }
+
+
+signalingGatewayClientSrcPort OBJECT-TYPE
+    SYNTAX      INTEGER
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "SG client source port."
+    ::= { signalingGatewayClientEntry 4 }
+
+
+signalingGatewayClientProtocol OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "SG client protocol."
+    ::= { signalingGatewayClientEntry 5 }
+
+signalingGatewayClientIpState OBJECT-TYPE
+    SYNTAX      INTEGER { UP(0), DOWN(1) }
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "SG client TCP state. (0 = UP, 1 = DOWN)"
+    ::= { signalingGatewayClientEntry 6 }
+
+remoteSignalingEntry OBJECT-TYPE
+    SYNTAX      RemoteSignalingEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "an entry in remote signaling table."
+    INDEX { remoteSignalingIndex }
+    ::= { remoteSignalingTable 1 }
+
+RemoteSignalingEntry ::= SEQUENCE {
+    remoteSignalingIndex        Integer32,
+    remoteSignalingAddr         DisplayString,
+    remoteSignalingMtp2State    INTEGER,
+    remoteSignalingPeer         DisplayString,
+    remoteSignalingPort         INTEGER,
+    remoteSignalingProtocol     DisplayString,
+    remoteSignalingTcpState     INTEGER
+}
+
+remoteSignalingIndex OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "The value of this object uniquely identifies this ifEntry."
+    ::= { remoteSignalingEntry 1 }
+
+remoteSignalingAddr OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Remote signaling IP Address."
+    ::= { remoteSignalingEntry 2 }
+
+remoteSignalingMtp2State OBJECT-TYPE
+    SYNTAX      INTEGER { UP(0), DOWN (1) }
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Remote Signaling MTP2 state. (0 = UP, 1 = DOWN)"
+    ::= { remoteSignalingEntry 3 }
+
+remoteSignalingPeer OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Remote Signaling peer name."
+    ::= { remoteSignalingEntry 4 }
+
+remoteSignalingPort OBJECT-TYPE
+    SYNTAX      INTEGER (1..65535)
+    MAX-ACCESS  read-only
+    STATUS  mandatory
+    DESCRIPTION
+        "Remote Signaling destination port."
+    ::= { remoteSignalingEntry 5 }
+
+remoteSignalingProtocol OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Remote Signaling protocol."
+    ::= { remoteSignalingEntry 6 }
+
+remoteSignalingTcpState OBJECT-TYPE
+    SYNTAX      INTEGER { UP(0), DOWN (1) }
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Remote Signaling TCP state. (0 = UP, 1 = DOWN)"
+    ::= { remoteSignalingEntry 7 }
+
+localSignalingEntry OBJECT-TYPE
+    SYNTAX      LocalSignalingEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "An entry in the local signaling table."
+    INDEX { localSignalingIndex }
+    ::= { localSignalingTable 1 }
+
+LocalSignalingEntry ::= SEQUENCE {
+    localSignalingIndex         Integer32,
+    localSignalingChannel       Integer32,
+    localSignalingLink          DisplayString,
+    localSignalingLinkset       DisplayString,
+    localSignalingSlc           Integer32,
+    localSignalingSpan          Integer32,
+    localSignalingState         INTEGER
+}
+
+localSignalingIndex OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "The value of this object uniquely identifies this ifEntry."
+    ::= { localSignalingEntry 1 }
+
+localSignalingChannel OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Channel used for local signaling."
+    ::= { localSignalingEntry 2 }
+
+localSignalingLink OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Local signaling link."
+    ::= { localSignalingEntry 3 }
+
+localSignalingLinkset OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Local signaling linkset."
+    ::= { localSignalingEntry 4 }
+
+localSignalingSlc OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Local signaling slc."
+    ::= { localSignalingEntry 5 }
+
+localSignalingSpan OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Local signaling span."
+    ::= { localSignalingEntry 6 }
+
+localSignalingState OBJECT-TYPE
+    SYNTAX      INTEGER {DOWN(0), NOT-ALIGNED(1), ALIGNED(2), PROVING(3), READY(4), INSERVICE(5), UNKNOWN(6)}
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Local signaling state. (0 = DOWN, 1 = NOT-ALIGNED, 2 = PROVING, 3 = READY,
+        5 = INSERVICE, 6 = UNKNOWN)"
+    ::= { localSignalingEntry 7 }
+
+cicStatusEntry OBJECT-TYPE
+    SYNTAX      CicStatusEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "An entry in cicStatusTable."
+    INDEX { cicStatusIndex }
+    ::= { cicStatusTable 1 }
+
+CicStatusEntry ::= SEQUENCE {
+    cicStatusIndex      Integer32,
+    cicStatusNumber     Integer32,
+    cicStatus           INTEGER,
+    cicLinkset          DisplayString
+}
+
+cicStatusIndex OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "The value of this object uniquely identifies this ifEntry."
+    ::= { cicStatusEntry 1 }
+
+cicStatusNumber OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Cic number."
+    ::= { cicStatusEntry 2 }
+
+cicStatus OBJECT-TYPE
+    SYNTAX    INTEGER { IDLE(0), BUSY(1), RINGING(2), INITIALIZING(3), REMOTE-BLOCK(4), LOCAL-BLOCK(5), RESET-PENDING(6), DOWN(7) }
+    MAX-ACCESS  read-only
+    STATUS    current
+    DESCRIPTION
+        "Channel Type ( 0 = IDLE, 1 = BUSY, 2 = RINGING, 3 = INITIALIZING,
+        4 = REMOTE_BLOCK, 5 = LOCAL_BLOCK, 6 = RESET_PENDING, 7 = DOWN)"
+    ::= { cicStatusEntry 3 }
+
+cicLinkset OBJECT-TYPE
+    SYNTAX DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS  current
+    DESCRIPTION
+        "Cic linkeset."
+    ::= { cicStatusEntry 4 }
+
+cicUsageEntry OBJECT-TYPE
+    SYNTAX  CicUsageEntry
+    MAX-ACCESS  not-accessible
+    STATUS  current
+    DESCRIPTION
+        "An entry in cicusageTable."
+    INDEX { cicUsageIndex }
+    ::= { cicUsageTable 1 }
+
+CicUsageEntry ::= SEQUENCE {
+  cicUsageIndex        Integer32,
+  cicUsageLinkset      DisplayString,
+  cicUsageTotal        Integer32,
+  cicUsageIdle         INTEGER,
+  cicUsageBusy          INTEGER,
+  cicUsageDownBlocked  INTEGER
+}
+
+cicUsageIndex  OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "The value of this object uniquely identifies this ifEntry."
+    ::= { cicUsageEntry 1 }
+
+cicUsageLinkset OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Cic linkset."
+    ::= { cicUsageEntry 2 }
+
+cicUsageTotal OBJECT-TYPE
+  SYNTAX Integer32 (1..2147483647)
+  MAX-ACCESS read-only
+  STATUS mandatory
+  DESCRIPTION
+  "Total of CICs per linkset."
+  ::= { cicUsageEntry 3 }
+
+cicUsageIdle OBJECT-TYPE
+    SYNTAX      INTEGER (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Number of idle CICs per linkset."
+    ::= { cicUsageEntry 4 }
+
+cicUsageIdlePercentage OBJECT-TYPE
+    SYNTAX      INTEGER (1..100)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Percentage of idle CICs per linkset."
+    ::= { cicUsageEntry 5 }
+
+cicUsageBusy OBJECT-TYPE
+    SYNTAX      INTEGER (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Number of busy CICs per linkset."
+    ::= { cicUsageEntry 6 }
+
+cicUsageBusyPercentage OBJECT-TYPE
+    SYNTAX      INTEGER (1..100)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Percentage of busy CICs per linkset."
+    ::= { cicUsageEntry 7 }
+
+cicUsageDownBlocked OBJECT-TYPE
+    SYNTAX      INTEGER (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Number of down/blocked CICs per linkset."
+    ::= { cicUsageEntry 8 }
+
+cicUsageDownBlockedPercentage OBJECT-TYPE
+    SYNTAX      INTEGER (1..100)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Percentage of down/blocked CICs per linkset."
+    ::= { cicUsageEntry 9 }
+
+sipNumber OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Total number of SIP peers."
+    ::= { sip 1 }
+
+sipStatusTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF SipStatusEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The table listing sip status information."
+    ::= { sip 2 }
+
+-- Trap
+sipTraps  OBJECT IDENTIFIER ::= { sip 3 }
+
+sipKeepaliveChange NOTIFICATION-TYPE
+    OBJECTS     { sipStatusIndex, sipName, sipKeepalive }
+    STATUS      current
+    DESCRIPTION
+        "A sipKeepaliveChange trap signifies that the sipKeepalive changed."
+    ::= { sipTraps 1 }
+
+sipStatusEntry OBJECT-TYPE
+    SYNTAX      SipStatusEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "An entry in sipStatusTable."
+    INDEX { sipStatusIndex }
+    ::= { sipStatusTable 1 }
+
+SipStatusEntry ::= SEQUENCE {
+    sipStatusIndex        Integer32,
+    sipName               DisplayString,
+    sipHost               DisplayString,
+    sipPort               INTEGER,
+    sipKeepalive          DisplayString,
+    sipRegistry           DisplayString
+}
+
+sipStatusIndex OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        " The value of this object uniquely identifies this ifEntry."
+    ::= { sipStatusEntry 1 }
+
+sipName OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "SIP name."
+    ::= { sipStatusEntry 2 }
+
+sipHost OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "SIP host IP"
+    ::= { sipStatusEntry 3 }
+
+sipPort OBJECT-TYPE
+    SYNTAX      INTEGER
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "SIP port"
+    ::= { sipStatusEntry 4 }
+
+sipKeepalive OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "SIP Keepalive state."
+    ::= { sipStatusEntry 5 }
+
+sipRegistry OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "SIP Registry state."
+    ::= { sipStatusEntry 6 }
+
+fwInRulesTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FwInRulesEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The table listing firewall rules statistics"
+    ::= { firewall 1 }
+
+fwInRulesEntry OBJECT-TYPE
+    SYNTAX      FwInRulesEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "An entry in fwInRulesEntryTable."
+    INDEX { fwInRulesEntryIndex }
+    ::= { fwInRulesTable 1 }
+
+FwInRulesEntry ::= SEQUENCE {
+    fwInRulesEntryIndex        Integer32,
+    fwInRulesName              DisplayString,
+    fwInRulesPktsCount         Counter32,
+    fwInRulesBytesCount        Counter32,
+    fwInRulesInIface           DisplayString,
+    fwInRulesSrcIPv4           DisplayString,
+    fwInRulesSrcMac            DisplayString,
+    fwInRulesProtocol          DisplayString,
+    fwInRulesDPortStart        Integer32,
+    fwInRulesDPortEnd          Integer32
+}
+
+fwInRulesEntryIndex OBJECT-TYPE
+    SYNTAX      Integer32 (1..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "The value of this object uniquely identifies a firewall rule."
+    ::= { fwInRulesEntry 1 }
+
+fwInRulesName OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Firewall rule name."
+    ::= { fwInRulesEntry 2 }
+
+fwInRulesPktsCount OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Number of packet matches for this firewall rule."
+    ::= { fwInRulesEntry 3 }
+
+fwInRulesBytesCount OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Number of bytes matches for this firewall rule."
+    ::= { fwInRulesEntry 4 }
+
+fwInRulesInIface OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Input interface name for this firewall rule."
+    ::= { fwInRulesEntry 5 }
+
+fwInRulesSrcIPv4 OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Packet source IPv4 address for this firewall rule."
+    ::= { fwInRulesEntry 6 }
+
+fwInRulesSrcMac OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Packet source MAC address for this firewall rule."
+    ::= { fwInRulesEntry 7 }
+
+fwInRulesProtocol OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "Packet L4 protocol for this firewall rule."
+    ::= { fwInRulesEntry 8 }
+
+fwInRulesDPortStart OBJECT-TYPE
+    SYNTAX      Integer32 (1..65535)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "L4 destination port (specific or range start) for this firewall rule."
+    ::= { fwInRulesEntry 9 }
+
+fwInRulesDPortEnd OBJECT-TYPE
+    SYNTAX      Integer32 (0..65535)
+    MAX-ACCESS  read-only
+    STATUS      mandatory
+    DESCRIPTION
+        "If non-zero, L4 destination port (range end) for this firewall rule."
+    ::= { fwInRulesEntry 10 }
+
+
+--*******************************************************************
+-- Call Statistics (TRAPs)
+--*******************************************************************
+
+callSourcePeer NOTIFICATION-TYPE
+    SYNTAX        Integer32 (0..65535)
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Source Peer"
+    ::= { call 1 }
+
+callDestinationPeer NOTIFICATION-TYPE
+    SYNTAX        Integer32 (0..65535)
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Destination Peer"
+    ::= { call 2 }
+
+callOutgoingSource NOTIFICATION-TYPE
+    SYNTAX        Integer32 (0..65535)
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Outgoing Source"
+    ::= { call 3 }
+
+callOutgoingDestination NOTIFICATION-TYPE
+    SYNTAX        Integer32 (0..65535)
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Outgoing Destination"
+    ::= { call 4 }
+
+callSourceChannel NOTIFICATION-TYPE
+    SYNTAX        DisplayString (SIZE (0..255))
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Source Channel"
+    ::= { call 5 }
+
+callDestinationChannel NOTIFICATION-TYPE
+    SYNTAX        DisplayString (SIZE (0..255))
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Destination Channel"
+    ::= { call 6 }
+
+callStart NOTIFICATION-TYPE
+    SYNTAX        DisplayString (SIZE (0..255))
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Start"
+    ::= { call 7 }
+
+callAnswer NOTIFICATION-TYPE
+    SYNTAX        DisplayString (SIZE (0..255))
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Answer"
+    ::= { call 8 }
+
+callEnd NOTIFICATION-TYPE
+    SYNTAX        DisplayString (SIZE (0..255))
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "End"
+    ::= { call 9 }
+
+callDuration NOTIFICATION-TYPE
+    SYNTAX        Integer32 (0..65535)
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Duration"
+    ::= { call 10 }
+
+callDisposition NOTIFICATION-TYPE
+    SYNTAX        DisplayString (SIZE (0..255))
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Disposition"
+    ::= { call 11 }
+
+callRule NOTIFICATION-TYPE
+    SYNTAX        DisplayString (SIZE (0..255))
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Rule"
+    ::= { call 12 }
+
+callHangupCause NOTIFICATION-TYPE
+    SYNTAX        Integer32 (0..65535)
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Hangup Cause"
+    ::= { call 13 }
+
+
+
+END
