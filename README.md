@@ -37,3 +37,8 @@ Importe o Dashboard: [SIP-I - ALIGERA - Dashboard](https://grafana.com/grafana/d
 - Instagram: [daniel_itallo](https://www.instagram.com/daniel_itallo)
 - Linkedin: [Daniel Italo](https://www.linkedin.com/in/daniel-italo/)
 - Telegram: @daniel_itallo
+
+![image](https://github.com/italodaniel/zbx-gra-aligera-sip-i/assets/47395906/f0c25fc6-4170-400e-b470-e22bfa245ea8)
+
+
+  
